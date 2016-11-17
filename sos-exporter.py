@@ -2,7 +2,19 @@ import bpy
 
 def write_object_data(context, filepath):
     f = open(filepath, 'w', encoding='utf-8')
-    f.write("Hello World")
+    
+    mesh_count = 0
+    for item in bpy.data.objects:
+        if item.type == 'MESH':
+            mesh_count += 1
+    f.write("%s\n" % mesh_count)
+            
+    for item in bpy.data.objects:
+        if item.type == 'MESH':
+            f.write("%s\n" % len(item.data.vertices))
+            for vertex in item.data.vertices:
+                f.write("%s %s %s\n" % (vertex.co.x, vertex.co.y, vertex.co.z))
+            
     f.close()
     return {'FINISHED'}
 
