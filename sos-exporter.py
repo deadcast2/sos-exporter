@@ -11,9 +11,15 @@ def write_object_data(context, filepath):
             
     for item in bpy.data.objects:
         if item.type == 'MESH':
-            f.write("%s\n" % len(item.data.vertices))
-            for vertex in item.data.vertices:
-                f.write("%s %s %s\n" % (vertex.co.x, vertex.co.y, vertex.co.z))
+            mesh = item.to_mesh(scene = bpy.context.scene, apply_modifiers = True, settings = 'PREVIEW')
+            f.write("%s\n" % len(mesh.vertices))
+            for vertex in mesh.vertices:
+                world_v = item.matrix_world * vertex.co
+                f.write("%s %s %s\n" % (world_v.x, world_v.z, -world_v.y))
+            f.write("%s\n" % len(mesh.polygons))
+            for polygon in mesh.polygons:
+                indices = polygon.vertices;
+                f.write("%s %s %s\n" % (indices[0], indices[1], indices[2]))
             
     f.close()
     return {'FINISHED'}
