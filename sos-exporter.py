@@ -16,9 +16,15 @@ def write_object_data(context, filepath):
             for vertex in mesh.vertices:
                 world_v = item.matrix_world * vertex.co
                 f.write("%s %s %s\n" % (world_v.x, world_v.z, -world_v.y))
+
+            f.write("%s\n" % len(mesh.uv_layers.active.data))
+            for x in mesh.uv_layers.active.data:
+                uv = x.uv
+                f.write("%s %s\n" % (uv[0], uv[1]))
+            
             f.write("%s\n" % len(mesh.polygons))
             for polygon in mesh.polygons:
-                indices = polygon.vertices;
+                indices = polygon.vertices
                 f.write("%s %s %s\n" % (indices[0], indices[1], indices[2]))
             
     f.close()
