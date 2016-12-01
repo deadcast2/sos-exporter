@@ -1,15 +1,19 @@
 import bpy
 
 def write_object_data(context, filepath):
-    f = open(filepath, 'w', encoding='utf-8')
+    prev_mode = bpy.context.object.mode
+    bpy.ops.object.mode_set(mode = 'OBJECT')
     
+    f = open(filepath, 'w', encoding = 'utf-8')
+    
+    selected_objects = bpy.context.selected_objects;
     mesh_count = 0
-    for item in bpy.data.objects:
+    for item in selected_objects:
         if item.type == 'MESH':
             mesh_count += 1
     f.write("%s\n" % mesh_count)
             
-    for item in bpy.data.objects:
+    for item in selected_objects:
         if item.type == 'MESH':
             mesh = item.to_mesh(scene = bpy.context.scene, apply_modifiers = True, settings = 'PREVIEW')
             f.write("%s\n" % len(mesh.vertices))
@@ -17,10 +21,13 @@ def write_object_data(context, filepath):
                 world_v = item.matrix_world * vertex.co
                 f.write("%s %s %s\n" % (world_v.x, world_v.z, -world_v.y))
 
-            f.write("%s\n" % len(mesh.uv_layers.active.data))
-            for x in mesh.uv_layers.active.data:
-                uv = x.uv
-                f.write("%s %s\n" % (uv[0], uv[1]))
+            if mesh.uv_layers.active:
+                f.write("%s\n" % len(mesh.uv_layers.active.data))
+                for x in mesh.uv_layers.active.data:
+                    uv = x.uv
+                    f.write("%s %s\n" % (uv[0], uv[1]))
+            else:
+                f.write("0\n")
             
             f.write("%s\n" % len(mesh.polygons))
             for polygon in mesh.polygons:
@@ -28,6 +35,7 @@ def write_object_data(context, filepath):
                 f.write("%s %s %s\n" % (indices[0], indices[1], indices[2]))
             
     f.close()
+    bpy.ops.object.mode_set(mode = prev_mode)
     return {'FINISHED'}
 
 from bpy_extras.io_utils import ExportHelper
